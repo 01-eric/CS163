@@ -13,7 +13,6 @@ class Stack {
         void push(T element); // top will have no left pointer
         T pop();
         T peek();
-        void print();
 
     private:
         Node<T>* top = NULL;
@@ -50,13 +49,4 @@ template <class T>
 T Stack<T>::peek() {
     if (top) return top->getValue(); // if not empty return top of stack
     else return NULL;
-}
-
-template <class T>
-void Stack<T>::print() {
-    Node<T>* current = top;
-    while (current) {
-        std::cout << current->getValue() << ' ' << std::flush;
-        current = current->getRight();
-    }
 }
