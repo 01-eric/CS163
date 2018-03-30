@@ -1,50 +1,56 @@
-#include "Node.h"
+#include "BinarySearchTree.h"
 #include <iostream>
-#include <cstddef>
-#include <string>
+#include <fstream>
+#include <climits>
 using namespace std;
 
-void rcPrint(Node<int>* node, string tabstop, bool branch) {
-    if (!node) { // when printing out only left node
-        cout << tabstop << "|   " << endl;
-        return;
-    } else cout << tabstop << (branch ? "├── " : "└── ") << node->getValue() << endl;
-    if (!node->getLeft() && node->getRight()) rcPrint(node->getRight(), tabstop + (branch ? "|   " : "    "), false);
-    else if (node->getLeft()) {
-        rcPrint(node->getRight(), tabstop + (branch ? "|   " : "    "), true);
-        rcPrint(node->getLeft(), tabstop + (branch ? "|   " : "    "), false);
-    }
+int indexOf(char c, char cstr[], int occurrence) {
+    int count = 0;
+    for (int i = 0; i < strlen(cstr); i++) if (cstr[i] == c && ++count == occurrence) return i;
+    return -1;
 }
 
 int main() {
-    Node<int>* root = new Node<int>(2);
-    Node<int>* n11 = new Node<int>(7);
-    Node<int>* n12 = new Node<int>(5);
-    Node<int>* n21 = new Node<int>(2);
-    Node<int>* n22 = new Node<int>(6);
-    Node<int>* n23 = new Node<int>(3);
-    Node<int>* n24 = new Node<int>(6);
-    Node<int>* n31 = new Node<int>(5);
-    Node<int>* n32 = new Node<int>(8);
-    Node<int>* n33 = new Node<int>(4);
-    Node<int>* n34 = new Node<int>(5);
-    Node<int>* n36 = new Node<int>(4);
-    Node<int>* n37 = new Node<int>(5);
-    Node<int>* n38 = new Node<int>(8);
-    root->setLeft(n11);
-    root->setRight(n12);
-    n11->setLeft(n21);
-    n11->setRight(n22);
-    n12->setLeft(n23);
-    n12->setRight(n24);
-    n21->setLeft(n31);
-    n21->setRight(n32);
-    n22->setLeft(n33);
-    n22->setRight(n34);
-    n23->setLeft(n36);
-    n24->setLeft(n37);
-    n24->setRight(n38);
-    rcPrint(root, "", false);
+    BinarySearchTree<int>* bst = new BinarySearchTree<int>();
+    char input[SHRT_MAX + 1];
+    cout << "Would you like to read in numbers from a file first? (yes/no): " << flush;
+    cin.getline(input, sizeof(input) / sizeof(input[0]));
+    if (strcmp(input, "yes") == 0) {
+        ifstream fin;
+        cout << "Enter the file name (e.g. example.txt): " << flush;
+        cin.getline(input, sizeof(input) / sizeof(input[0]));
+        fin.open(input);
+        if (fin.is_open()) {
+            int count = 0;
+            do {
+                int data;
+                fin >> data;
+                bst->insert(data);
+                count++;
+            } while (!fin.eof());
+            cout << "Created binary search tree with " << count << " nodes." << endl;
+        } else cout << "File not found." << endl;
+    }
+
+    // four options: enter a number to insert it, print to print heap, rm followed by a number to remove it, quit to exit
+    cout << "Enter a number to insert it to the binary search tree." << endl;
+    cout << "Type \"print\" to list all elements in a tree format." << endl;
+    cout << "Type \"rm\" followed by a number to remove it from the tree, if present." << endl;
+    cout << "Type \"quit\" to exit the program." << endl;
+    do {
+        cout << "> " << flush;
+        cin.getline(input, sizeof(input) / sizeof(input[0]));
+        if (isdigit(input[0])) bst->insert(atoi(input));
+        else if (strcmp(input, "print") == 0) bst->print();
+        else if (indexOf(' ', input, 1) != -1) { // assume keyword is rm
+            char num[strlen(input) - indexOf(' ', input, 1)]; // extra space for '\0'
+            // cout << strlen(input) << ' ' << indexOf(' ', input, 1) << endl;
+            // cout << sizeof(num) / sizeof(num[0]) << ' ' << strlen(num) << endl;
+            for (int i = 0; num[i] != '\0'; i++) num[i] = input[indexOf(' ', input, 1) + 1 + i];
+            // cout << num << endl;
+            if (!bst->remove(atoi(num))) cout << num << " is not in the tree." << endl;
+        }
+    } while (strcmp(input, "quit") != 0);
+
+    delete bst;
 }
-
-

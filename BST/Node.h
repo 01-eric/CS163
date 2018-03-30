@@ -1,7 +1,7 @@
 #include <cstddef>
 
-#ifndef NODE_H_
-#define NODE_H_
+#ifndef NODE_H
+#define NODE_H
 
 template <class T>
 class Node {
@@ -13,15 +13,18 @@ class Node {
         void setValue(T value);
         void setLeft(Node* left);
         void setRight(Node* right);
+        void setParent(Node* parent);
         // getters
         T getValue();
         Node<T>* getLeft();
         Node<T>* getRight();
+        Node<T>* getParent();
 
     private:
         T value;
         Node<T>* left;
         Node<T>* right;
+        Node<T>* parent;
 
 };
 
@@ -35,7 +38,7 @@ Node<T>::Node(T value) {
 
 template <class T>
 Node<T>::~Node() {
-    delete value;
+    // if T is pointer?? how do I check?? delete value;
 }
 
 template <class T>
@@ -54,6 +57,11 @@ void Node<T>::setRight(Node<T>* right) {
 }
 
 template <class T>
+void Node<T>::setParent(Node<T>* parent) {
+    this->parent = parent;
+}
+
+template <class T>
 T Node<T>::getValue() {
     return value;
 }
@@ -66,4 +74,9 @@ Node<T>* Node<T>::getLeft() {
 template <class T>
 Node<T>* Node<T>::getRight() {
     return right;
+}
+
+template <class T>
+Node<T>* Node<T>::getParent() {
+    return parent;
 }
