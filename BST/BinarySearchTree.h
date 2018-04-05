@@ -20,6 +20,7 @@ class BinarySearchTree {
         bool remove(T key);
 
     private:
+	char* concat(char* &destination, const char* source);
         Node<T>* root;
         void rcDelete(Node<T>* node);
         Node<T>* rcInsert(Node<T>* node, T element);
@@ -39,6 +40,17 @@ BinarySearchTree<T>::BinarySearchTree() {
 template <class T>
 BinarySearchTree<T>::~BinarySearchTree() {
     if (root) rcDelete(root);
+}
+
+template <class T>
+char* BinarySearchTree<T>::concat(char* &destination, const char* source) {
+    char* toReturn = new char[strlen(destination) + strlen(source) + 1];
+    toReturn[strlen(destination) + strlen(source)] = '\0';
+    strcpy(toReturn, destination);
+    for (int i = 0; i < strlen(source); i++) toReturn[strlen(destination) + i] = source[i];
+    delete[] destination;
+    destination = toReturn;
+    return destination;
 }
 
 template <class T>
@@ -115,4 +127,5 @@ void BinarySearchTree<T>::replaceNode(Node<T>* toReplace, Node<T>* newNode) {
     else if (toReplace == toReplace->getParent()->getLeft()) toReplace->getParent()->setLeft(newNode); // if left child of parent, replace left child of parent with newNode
     else toReplace->getParent()->setRight(newNode); // if right child of parent, replace right child of parent with newNode
     if (newNode) newNode->setParent(toReplace->getParent()); // newNode's parent is now parent of replaced node
+    delete toReplace; // now that node to replace is out of tree, deallocate it
 }

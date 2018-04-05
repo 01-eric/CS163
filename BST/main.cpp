@@ -22,11 +22,12 @@ int main() {
         fin.open(input);
         if (fin.is_open()) {
             int count = 0;
+	    int data;
+	    fin >> data;
             do {
-                int data;
-                fin >> data;
                 bst->insert(data);
                 count++;
+		fin >> data;
             } while (!fin.eof());
             cout << "Created binary search tree with " << count << " nodes." << endl;
         } else cout << "File not found." << endl;
@@ -44,10 +45,8 @@ int main() {
         else if (strcmp(input, "print") == 0) bst->print();
         else if (indexOf(' ', input, 1) != -1) { // assume keyword is rm
             char num[strlen(input) - indexOf(' ', input, 1)]; // extra space for '\0'
-            // cout << strlen(input) << ' ' << indexOf(' ', input, 1) << endl;
-            // cout << sizeof(num) / sizeof(num[0]) << ' ' << strlen(num) << endl;
-            for (int i = 0; num[i] != '\0'; i++) num[i] = input[indexOf(' ', input, 1) + 1 + i];
-            // cout << num << endl;
+	    for (int i = 0; i < sizeof(num) / sizeof(num[0]) - 1; i++) num[i] = input[indexOf(' ', input, 1) + 1 + i];
+	    num[sizeof(num) / sizeof(num[0]) - 1] = '\0';
             if (!bst->remove(atoi(num))) cout << num << " is not in the tree." << endl;
         }
     } while (strcmp(input, "quit") != 0);
