@@ -24,7 +24,7 @@ class BinarySearchTree {
         Node<T>* root;
         void rcDelete(Node<T>* node);
         Node<T>* rcInsert(Node<T>* node, T element);
-        void rcPrint(Node<T>* node, string tabstop, bool branch);
+        void rcPrint(Node<T>* node, char* tabstop, bool branch);
         Node<T>* rcSearch(Node<T>* node, T key);
         void replaceNode(Node<T>* toReplace, Node<T>* newNode);
 };
@@ -42,13 +42,13 @@ BinarySearchTree<T>::~BinarySearchTree() {
     if (root) rcDelete(root);
 }
 
-template <class T>
+template <class T> // same idea as strtok from cstring library
 char* BinarySearchTree<T>::concat(char* &destination, const char* source) {
     char* toReturn = new char[strlen(destination) + strlen(source) + 1];
     toReturn[strlen(destination) + strlen(source)] = '\0';
     strcpy(toReturn, destination);
     for (int i = 0; i < strlen(source); i++) toReturn[strlen(destination) + i] = source[i];
-    delete[] destination;
+    // delete[] destination;
     destination = toReturn;
     return destination;
 }
@@ -61,7 +61,7 @@ void BinarySearchTree<T>::insert(T element) {
 template <class T>
 void BinarySearchTree<T>::print() {
     if (!root) cout << "Tree is empty." << endl;
-    else rcPrint(root, "", false);
+    else rcPrint(root, new char[1] {'\0'}, false);
 }
 
 // calls delete on subtree with root node "node"
@@ -85,16 +85,19 @@ Node<T>* BinarySearchTree<T>::rcInsert(Node<T>* node, T element) {
 }
 
 template <class T>
-void BinarySearchTree<T>::rcPrint(Node<T>* node, string tabstop, bool branch) {
+void BinarySearchTree<T>::rcPrint(Node<T>* node, char* tabstop, bool branch) {
     if (!node) { // when printing out only left node
         cout << tabstop << "|   " << endl;
         return;
     } else cout << tabstop << (branch ? "├── " : "└── ") << node->getValue() << endl;
-    if (!node->getLeft() && node->getRight()) rcPrint(node->getRight(), tabstop + (branch ? "|   " : "    "), false);
+    concat(tabstop, (branch ? "|   " : "    "));
+    if (!node->getLeft() && node->getRight()) rcPrint(node->getRight(), tabstop, false);
     else if (node->getLeft()) {
-        rcPrint(node->getRight(), tabstop + (branch ? "|   " : "    "), true);
-        rcPrint(node->getLeft(), tabstop + (branch ? "|   " : "    "), false);
-    }
+        rcPrint(node->getRight(), tabstop, true);
+	char* copyOfTabstop = new char[strlen(tabstop) + 1];
+	strcpy(copyOfTabstop, tabstop); // create copies when branching so each remembers how far to indent
+        rcPrint(node->getLeft(), copyOfTabstop, false);
+    } else delete[] tabstop; // if node has no children it will no longer use tabstop
 }
 
 // search starting at root of subtree "node"

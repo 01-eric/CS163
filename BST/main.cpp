@@ -27,7 +27,7 @@ int main() {
             do {
                 bst->insert(data);
                 count++;
-		fin >> data;
+		fin >> data; // prevent reading last line twice
             } while (!fin.eof());
             cout << "Created binary search tree with " << count << " nodes." << endl;
         } else cout << "File not found." << endl;
