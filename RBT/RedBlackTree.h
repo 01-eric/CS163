@@ -19,7 +19,7 @@ class RedBlackTree {
         void print();
 
     private:
-	    char* concat(char* &destination, const char* source);
+        char* concat(char* &destination, const char* source);
         Node<T>* root;
         void rcDelete(Node<T>* node);
         Node<T>* rcInsert(Node<T>* node, Node<T>* newNode);
