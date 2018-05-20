@@ -80,7 +80,11 @@ void RedBlackTree<T>::rcDelete(Node<T>* node) {
 
 template <class T>
 Node<T>* RedBlackTree<T>::rcInsert(Node<T>* node, Node<T>* newNode) {
-    if (!node /*root null*/ || node->isLeaf()) node = newNode;
+    /*if (node->isLeaf()) { // delete pointer so it can be replaced with non-leaf node inserted
+        delete node;
+        node = NULL;
+    } if (!node) node = newNode;*/
+    if (!node || node->isLeaf()) node = newNode;
     else if (newNode->getValue() <= node->getValue()) { // assume overloaded <= operator
         node->setLeft(rcInsert(node->getLeft(), newNode));
         node->getLeft()->setParent(node);
@@ -117,34 +121,6 @@ Node<T>* RedBlackTree<T>::rcSearch(Node<T>* node, T key) {
     else return rcSearch(node->getRight(), key);
 }
 
-// node->right takes node's position, node moves left to become left child of node->right
-// node-right's left child becomes node's right child
-template <class T>
-void RedBlackTree<T>::rotateLeft(Node<T>* node) {
-    Node<T>* rightNode = node->getRight();
-    node->setRight(rightNode->getLeft()); // node no longer points to rightNode
-    rightNode->setLeft(node); // node is now left child of rightNode
-    rightNode->setParent(node->getParent()); // rightNode takes node's position
-    node->setParent(rightNode);
-    if (rightNode->getParent()) { // if rightNode did not take root's position
-        if (node == rightNode->getParent()->getLeft()) rightNode->getParent()->setLeft(rightNode);
-        else rightNode->getParent()->setRight(rightNode); // update parent to child relationship
-    } else root = rightNode; // otherwise rightNode moved into root position
-}
-
-template <class T>
-void RedBlackTree<T>::rotateRight(Node<T>* node) {
-    Node<T>* leftNode = node->getLeft();
-    node->setLeft(leftNode->getRight());
-    leftNode->setRight(node);
-    leftNode->setParent(node->getParent());
-    node->setParent(leftNode);
-    if (leftNode->getParent()) {
-        if (node == leftNode->getParent()->getLeft()) leftNode->getParent()->setLeft(leftNode);
-        else leftNode->getParent()->setRight(leftNode);
-    } else root = leftNode;
-}
-
 template <class T>
 void RedBlackTree<T>::repairTree(Node<T>* node) {
     if (!node->getParent()) node->setRed(false); // root always black
@@ -173,3 +149,33 @@ void RedBlackTree<T>::repairTree(Node<T>* node) {
         }
     }
 }
+
+// node->right takes node's position, node moves left to become left child of node->right
+// node-right's left child becomes node's right child
+template <class T>
+void RedBlackTree<T>::rotateLeft(Node<T>* node) {
+    Node<T>* rightNode = node->getRight();
+    node->setRight(rightNode->getLeft()); // node no longer points to rightNode
+    rightNode->setLeft(node); // node is now left child of rightNode
+    rightNode->setParent(node->getParent()); // rightNode takes node's position
+    node->setParent(rightNode);
+    if (rightNode->getParent()) { // if rightNode did not take root's position
+        if (node == rightNode->getParent()->getLeft()) rightNode->getParent()->setLeft(rightNode);
+        else rightNode->getParent()->setRight(rightNode); // update parent to child relationship
+    } else root = rightNode; // otherwise rightNode moved into root position
+}
+
+template <class T>
+void RedBlackTree<T>::rotateRight(Node<T>* node) {
+    Node<T>* leftNode = node->getLeft();
+    node->setLeft(leftNode->getRight());
+    leftNode->setRight(node);
+    leftNode->setParent(node->getParent());
+    node->setParent(leftNode);
+    if (leftNode->getParent()) {
+        if (node == leftNode->getParent()->getLeft()) leftNode->getParent()->setLeft(leftNode);
+        else leftNode->getParent()->setRight(leftNode);
+    } else root = leftNode;
+}
+
+
