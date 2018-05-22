@@ -25,7 +25,8 @@ class RedBlackTree {
         Node<T>* rcInsert(Node<T>* node, Node<T>* newNode);
         void rcPrint(Node<T>* node, char* tabstop, bool branch);
         Node<T>* rcSearch(Node<T>* node, T key);
-        void repairTree(Node<T>* node);
+        void repairTreeInsert(Node<T>* node);
+        void replaceNode(Node<T>* toReplace, Node<T>* newNode);
         void rotateLeft(Node<T>* node);
         void rotateRight(Node<T>* node);
 };
@@ -59,8 +60,10 @@ Node<T>* RedBlackTree<T>::insert(T element) {
     Node<T>* newNode = new Node<T>(element, true); // new nodes are always red
     root = rcInsert(root, newNode); 
     newNode->setLeft(new Node<T>()); // leaf nodes
+    newNode->getLeft()->setParent(newNode);
     newNode->setRight(new Node<T>());
-    repairTree(newNode);
+    newNode->getRight()->setParent(newNode);
+    repairTreeInsert(newNode);
     return newNode;
 }
 
@@ -83,7 +86,7 @@ Node<T>* RedBlackTree<T>::rcInsert(Node<T>* node, Node<T>* newNode) {
     /*if (node->isLeaf()) { // delete pointer so it can be replaced with non-leaf node inserted
         delete node;
         node = NULL;
-    } if (!node) node = newNode;*/
+    } if (!node) node = newNode; */
     if (!node || node->isLeaf()) node = newNode;
     else if (newNode->getValue() <= node->getValue()) { // assume overloaded <= operator
         node->setLeft(rcInsert(node->getLeft(), newNode));
@@ -122,14 +125,14 @@ Node<T>* RedBlackTree<T>::rcSearch(Node<T>* node, T key) {
 }
 
 template <class T>
-void RedBlackTree<T>::repairTree(Node<T>* node) {
+void RedBlackTree<T>::repairTreeInsert(Node<T>* node) {
     if (!node->getParent()) node->setRed(false); // root always black
     else if (node->getParent()->isRed()) { // if parent not black then repair tree, uncle must exist because parent is not root
         if (node->getUncle()->isRed()) {
             node->getParent()->setRed(false);
             node->getUncle()->setRed(false);
             node->getGrandparent()->setRed(true);
-            repairTree(node->getGrandparent());
+            repairTreeInsert(node->getGrandparent());
         } else { // uncle is black
             if (node == node->getGrandparent()->getLeft()->getRight()) { // rotate into left left case
                 rotateLeft(node->getParent()); // node takes parent position, parent becomes left child
@@ -150,12 +153,22 @@ void RedBlackTree<T>::repairTree(Node<T>* node) {
     }
 }
 
+template <class T> // attach subtree of newNode in place of toReplace
+void RedBlackTree<T>::replaceNode(Node<T>* toReplace, Node<T>* newNode) {
+    if (!toReplace->getParent()) root = newNode; // if no parent, replace the root with newNode
+    else if (toReplace == toReplace->getParent()->getLeft()) toReplace->getParent()->setLeft(newNode); // if left child of parent, replace left child of parent with newNode
+    else toReplace->getParent()->setRight(newNode); // if right child of parent, replace right child of parent with newNode
+    if (newNode) newNode->setParent(toReplace->getParent()); // newNode's parent is now parent of replaced node
+    delete toReplace; // now that node to replace is out of tree, deallocate it
+}
+
 // node->right takes node's position, node moves left to become left child of node->right
 // node-right's left child becomes node's right child
 template <class T>
 void RedBlackTree<T>::rotateLeft(Node<T>* node) {
     Node<T>* rightNode = node->getRight();
     node->setRight(rightNode->getLeft()); // node no longer points to rightNode
+    node->getRight()->setParent(node);
     rightNode->setLeft(node); // node is now left child of rightNode
     rightNode->setParent(node->getParent()); // rightNode takes node's position
     node->setParent(rightNode);
@@ -169,6 +182,7 @@ template <class T>
 void RedBlackTree<T>::rotateRight(Node<T>* node) {
     Node<T>* leftNode = node->getLeft();
     node->setLeft(leftNode->getRight());
+    node->getLeft()->setParent(node);
     leftNode->setRight(node);
     leftNode->setParent(node->getParent());
     node->setParent(leftNode);
