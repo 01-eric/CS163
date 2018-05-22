@@ -15,8 +15,10 @@ class RedBlackTree {
     public:
         RedBlackTree();
         ~RedBlackTree();
+        bool contains(T key);
         Node<T>* insert(T element);
         void print();
+        bool remove(T key);
 
     private:
         char* concat(char* &destination, const char* source);
@@ -26,6 +28,7 @@ class RedBlackTree {
         void rcPrint(Node<T>* node, char* tabstop, bool branch);
         Node<T>* rcSearch(Node<T>* node, T key);
         void repairTreeInsert(Node<T>* node);
+        void repairTreeRemove(Node<T>* node);
         void replaceNode(Node<T>* toReplace, Node<T>* newNode);
         void rotateLeft(Node<T>* node);
         void rotateRight(Node<T>* node);
@@ -53,6 +56,11 @@ char* RedBlackTree<T>::concat(char* &destination, const char* source) {
     // delete[] destination;
     destination = toReturn;
     return destination;
+}
+
+template <class T>
+bool RedBlackTree<T>::contains(T key) {
+    return !rcSearch(root, key)->isLeaf();
 }
 
 template <class T> 
@@ -83,11 +91,10 @@ void RedBlackTree<T>::rcDelete(Node<T>* node) {
 
 template <class T>
 Node<T>* RedBlackTree<T>::rcInsert(Node<T>* node, Node<T>* newNode) {
-    /*if (node->isLeaf()) { // delete pointer so it can be replaced with non-leaf node inserted
+    if (node && node->isLeaf()) { // delete pointer so it can be replaced with non-leaf node inserted
         delete node;
-        node = NULL;
-    } if (!node) node = newNode; */
-    if (!node || node->isLeaf()) node = newNode;
+        node = newNode;
+    } else if (!node) node = newNode;
     else if (newNode->getValue() <= node->getValue()) { // assume overloaded <= operator
         node->setLeft(rcInsert(node->getLeft(), newNode));
         node->getLeft()->setParent(node);
@@ -119,9 +126,40 @@ void RedBlackTree<T>::rcPrint(Node<T>* node, char* tabstop, bool branch) {
 // search starting at root of subtree "node"
 template <class T> // assume overloading of == and <
 Node<T>* RedBlackTree<T>::rcSearch(Node<T>* node, T key) {
-    if (!node || key == node->getValue()) return node;
+    if (node->isLeaf() || key == node->getValue()) return node;
     else if (key < node->getValue()) return rcSearch(node->getLeft(), key);
     else return rcSearch(node->getRight(), key);
+}
+
+template <class T>
+bool RedBlackTree<T>::remove(T key) {
+    Node<T>* toDelete = rcSearch(root, key);
+    if (toDelete->isLeaf()) return false; // key not in tree
+    if (!toDelete->getLeft()->isLeaf() && !toDelete->getRight()->isLeaf()) { // node to delete has two children
+        // use one or no child deletion on successor after value of successor copied into node to delete
+        Node<T>* successor = toDelete->getRight(); // find successor as leftmost node of right subtree
+        while (!successor->getLeft()->isLeaf()) successor = successor->getLeft(); 
+        toDelete->setValue(successor->getValue()); // copy just the value of the successor
+        toDelete = successor; // set successor to be deleted with one or no child methods that follow
+    } if (toDelete->isRed()) { // must have no children besides null leaves
+        delete toDelete->getRight(); // since moving left leaf node into position this is no longer used
+        replaceNode(toDelete, toDelete->getLeft());
+    } else if (!toDelete->getLeft()->isLeaf()) { // black node with red left child
+        toDelete->getLeft()->setRed(false); // red child turns black and takes node to delete's position
+        replaceNode(toDelete, toDelete->getLeft());
+    } else if (!toDelete->getRight()->isLeaf()) { // black node with red right child
+        toDelete->getRight()->setRed(false);
+        replaceNode(toDelete, toDelete->getRight());
+    } else { // black node with no children
+        Node<T>* child = toDelete->getLeft();
+        delete toDelete->getRight(); // since moving left leaf node into position this is no longer used
+        replaceNode(toDelete, child);
+        repairTreeRemove(child); // child has reduced black depth, call repair
+        if (root->isLeaf()) { // if deleted root remove leaf node in root
+            delete root;
+            root = NULL;
+        }
+    } return true;
 }
 
 template <class T>
@@ -150,6 +188,19 @@ void RedBlackTree<T>::repairTreeInsert(Node<T>* node) {
             // you must pass through grandparent(black)
             // now to get to grandparent or node(red) must pass through parent (black)
         }
+    }
+}
+
+template <class T>
+void RedBlackTree<T>::repairTreeRemove(Node<T>* node) { // subtree of "node" has reduced black length. goal is to balance the reduction
+    if (node->getParent() == null) return; // case 1: node to repair is root, no need to do so because we can reduce entire tree's black depth
+    // case 2: sibling is red (thus parent is black)
+    if (node->getSibling()->isRed()) { // transfer red from sibling to parent, rotate parent towards node's side
+        // node still has reduced black height but now sibling is black, can be solved with upcoming black sibling cases
+        node->getParent()->setRed(true);
+        node->getSibling()->setRed(false);
+        if (node == node->getParent()->getLeft()) rotateLeft(node->getParent());
+        else rotateRight(node->getParent());
     }
 }
 

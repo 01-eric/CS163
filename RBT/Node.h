@@ -40,7 +40,7 @@ class Node {
 
 template <class T>
 Node<T>::Node(T value, bool red) {
-    left = right = NULL;
+    left = right = parent = NULL;
     this->value = value;
     this->red = red;
 }
