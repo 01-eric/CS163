@@ -37,7 +37,7 @@ int main() {
     char* input = new char[SHRT_MAX];
     // four options: enter a number to insert, "print" to print tree, "rm" followed by a number to remove it, "quit" to exit
     cout << "Enter a number to insert it to the red black tree." << endl;
-    cout << "Type \"file\" followed by the file name to input numbers from a file." << endl;
+    cout << "Enter a file name to input numbers from a file." << endl;
     cout << "Type \"print\" to list all element sin a tree format." << endl;
     cout << "Type \"find\" followed by a number to search for an element." << endl;
     cout << "Type \"rm\" followed by a number to remove it from the tree, if present." << endl;
@@ -48,8 +48,7 @@ int main() {
         cin.getline(input, SHRT_MAX);
         vector<char*>* tokens = split(input, ' ');
         delete[] input;
-        if (isdigit(tokens->front()[0])) rbt->insert(atoi(tokens->front()));
-        else if (strcmp(tokens->front(), "file") == 0) {
+        if (indexOf('.', tokens->front(), 1) != -1) {
             ifstream fin;
             fin.open(tokens->back());
             if (fin.is_open()) {
@@ -61,9 +60,10 @@ int main() {
                     count++;
                     fin >> data;
                 } while (!fin.eof());
-                cout << "Inserted " << count << " nodes." << endl;
+                cout << "inserted " << count << " nodes" << endl;
             } else cout << "File not found." << endl;
-        } else if (strcmp(tokens->front(), "print") == 0) rbt->print();
+        } else if (isdigit(tokens->front()[0])) rbt->insert(atoi(tokens->front()));
+        else if (strcmp(tokens->front(), "print") == 0) rbt->print();
         else if (strcmp(tokens->front(), "find") == 0) cout << (rbt->contains(atoi(tokens->back())) ? "found" : "not found") << endl;
         else if (strcmp(tokens->front(), "rm") == 0) cout << (rbt->remove(atoi(tokens->back())) ? "" : "not found\n") << flush;
         else if (strcmp(tokens->front(), "quit") == 0) quit = true;

@@ -126,7 +126,7 @@ void RedBlackTree<T>::rcPrint(Node<T>* node, char* tabstop, bool branch) {
 // search starting at root of subtree "node"
 template <class T> // assume overloading of == and <
 Node<T>* RedBlackTree<T>::rcSearch(Node<T>* node, T key) {
-    if (node->isLeaf() || key == node->getValue()) return node;
+    if (!node || node->isLeaf() || key == node->getValue()) return node;
     else if (key < node->getValue()) return rcSearch(node->getLeft(), key);
     else return rcSearch(node->getRight(), key);
 }
@@ -134,7 +134,7 @@ Node<T>* RedBlackTree<T>::rcSearch(Node<T>* node, T key) {
 template <class T>
 bool RedBlackTree<T>::remove(T key) {
     Node<T>* toDelete = rcSearch(root, key);
-    if (toDelete->isLeaf()) return false; // key not in tree
+    if (!toDelete || toDelete->isLeaf()) return false; // key not in tree
     if (!toDelete->getLeft()->isLeaf() && !toDelete->getRight()->isLeaf()) { // node to delete has two children
         // use one or no child deletion on successor after value of successor copied into node to delete
         Node<T>* successor = toDelete->getRight(); // find successor as leftmost node of right subtree
@@ -193,7 +193,7 @@ void RedBlackTree<T>::repairTreeInsert(Node<T>* node) {
 
 template <class T>
 void RedBlackTree<T>::repairTreeRemove(Node<T>* node) { // subtree of "node" has reduced black length. goal is to balance the reduction
-    if (node->getParent() == null) return; // case 1: node to repair is root, no need to do so because we can reduce entire tree's black depth
+    if (!node->getParent()) return; // case 1: node to repair is root, no need to do so because we can reduce entire tree's black depth
     // case 2: sibling is red (thus parent is black)
     if (node->getSibling()->isRed()) { // transfer red from sibling to parent, rotate parent towards node's side
         // node still has reduced black height but now sibling is black, can be solved with upcoming black sibling cases
@@ -201,6 +201,35 @@ void RedBlackTree<T>::repairTreeRemove(Node<T>* node) { // subtree of "node" has
         node->getSibling()->setRed(false);
         if (node == node->getParent()->getLeft()) rotateLeft(node->getParent());
         else rotateRight(node->getParent());
+    } // case 3/4: sibling is black, both children are black
+    if (!node->getSibling()->getLeft()->isRed() && !node->getSibling()->getRight()->isRed()) {
+        if (!node->getParent()->isRed()) { // case 3: parent is black. reduce all other subtree paths' black lengths and recur on parent
+            node->getSibling()->setRed(true); // now all paths not going through current node are reduced in black length
+            repairTreeRemove(node->getParent()); // entire subtree of parent has reduced black length, recursively repair parent
+        } else { // case 4: parent is red, move red from parent to sibling, so other paths' black lengths are the same but node increases by 1
+            node->getParent()->setRed(false); // red parent is now black
+            node->getSibling()->setRed(true); // paths not going through node are kept the same, but node increases black depth by 1 and is now balanced
+        }
+    } else { // case 5/6: sibling is black and has at least 1 red child (sibling cannot be recolored)
+        // case 5: right-left/left-right case, sibling on right and red child only on left, or sibling on left and and red child only on right
+        if (node == node->getParent()->getLeft() && !node->getSibling()->getRight()->isRed() && node->getSibling()->getLeft()->isRed()) { // right left 
+            node->getSibling()->setRed(true); // repaint sibling as red
+            node->getSibling()->getLeft()->setRed(false); // repaint sibling's red child as black
+            rotateRight(node->getSibling()); // rotate now-red sibling to the right to force a right-right case that can be solved with next step
+        } else if (node == node->getParent()->getRight() && !node->getSibling()->getLeft()->isRed() && node->getSibling()->getRight()->isRed()) { // left right
+            node->getSibling()->setRed(true); // same idea as right left case
+            node->getSibling()->getRight()->setRed(false);
+            rotateLeft(node->getSibling());  
+        } // case 6: right-right/left-left case, sibling on right and right child is red, or sibling on left and left child is red
+        node->getSibling()->setRed(node->getParent()->isRed()); // sibling and parent swap colors
+        node->getParent()->setRed(false); // given sibling is black at this point
+        if (node == node->getParent()->getLeft()) { // right right
+            node->getSibling()->getRight()->setRed(false); // color red child to be black
+            rotateLeft(node->getParent()); // rotate black parent towards node, so node gains black length. now balanced
+        } else { // left left
+            node->getSibling()->getLeft()->setRed(false);
+            rotateRight(node->getParent());
+        }
     }
 }
 
