@@ -70,4 +70,5 @@ int main() {
         delete tokens;
         input = new char[SHRT_MAX];
     } while (!quit);
+    delete rbt;
 }
