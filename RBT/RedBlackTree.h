@@ -46,7 +46,7 @@ RedBlackTree<T>::~RedBlackTree() {
     if (root) rcDelete(root);
 }
 
-template <class T> // same idea as strtok from cstring library
+template <class T> // same idea as strcat from cstring library
 char* RedBlackTree<T>::concat(char* &destination, const char* source) {
     char* toReturn = new char[strlen(destination) + strlen(source) + 1];
     toReturn[strlen(destination) + strlen(source)] = '\0';
@@ -238,7 +238,7 @@ void RedBlackTree<T>::replaceNode(Node<T>* toReplace, Node<T>* newNode) {
     else if (toReplace == toReplace->getParent()->getLeft()) toReplace->getParent()->setLeft(newNode); // if left child of parent, replace left child of parent with newNode
     else toReplace->getParent()->setRight(newNode); // if right child of parent, replace right child of parent with newNode
     if (newNode) newNode->setParent(toReplace->getParent()); // newNode's parent is now parent of replaced node
-    delete toReplace; // now that node to replace is out of tree, deallocate it
+    delete toReplace; // now that node to replace is out of tree, `deallocate it
 }
 
 // node->right takes node's position, node moves left to become left child of node->right
