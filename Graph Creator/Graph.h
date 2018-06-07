@@ -23,6 +23,8 @@ class Graph {
         int indexOf(vector<char>* v, char key);
 };
 
+#endif
+
 Graph::~Graph() {
     delete graph; // apparently all elements of vector are also destroyed
     delete nodemap;
@@ -79,5 +81,3 @@ void Graph::print() {
 int Graph::size() {
     return graph->size();
 }
-
-#endif
