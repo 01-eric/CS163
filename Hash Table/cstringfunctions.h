@@ -3,7 +3,7 @@
 using namespace std;
 
 int indexOf(char c, char* cstr, int occurrence) {
-    int count = 0;
+    int count = 0; // increment count to find nth occurrence
     for (int i = 0; i < strlen(cstr); i++) if (cstr[i] == c && ++count == occurrence) return i;
     return -1;
 }
@@ -26,4 +26,14 @@ vector<char*>* split(char* cstr, char delim) {
         if (startIndex != endIndex) tokens->push_back(substr(cstr, startIndex, endIndex)); // prevent empty string
     } while (indexOf(delim, cstr, ++count) != -1); // while there are more tokens
     return tokens;
+}
+
+char* concat(char* &destination, char* source) {
+    char* toReturn = new char[strlen(destination) + strlen(source) + 1];
+    toReturn[strlen(destination) + strlen(source)] = '\0';
+    strcpy(toReturn, destination);
+    for (int i = 0; i < strlen(source); i++) toReturn[strlen(destination) + i] = source[i];
+    // delete[] destination;
+    destination = toReturn;
+    return destination;
 }
