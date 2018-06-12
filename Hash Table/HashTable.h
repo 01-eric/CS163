@@ -48,11 +48,11 @@ void HashTable::add(Student* student) {
 }
 
 void HashTable::print() {
-    cout << "Size: " << size << ", Capacity: " << data_length << endl;
+    cout << "Size: " << size << ", Capacity: " << data_length << endl; 
     for (int i = 0; i < data_length; i++) { 
         if (data[i]->getSize() > 0) {
             cout << i << ": ";
-            for (int j = 0; j < data[i]->getSize(); j++) {
+            for (int j = 0; j < data[i]->getSize(); j++) { // iterate throuhg all students
                 cout << (j == 0 ? '[' : ' ');
                 data[i]->get(j)->print();
                 cout << (j == data[i]->getSize() - 1 ? ']' : ',');
@@ -62,23 +62,23 @@ void HashTable::print() {
 }
 
 void HashTable::rehash() {
-    LinkedList<Student*>** oldArray = data;
-    data = new LinkedList<Student*>*[(data_length *= 2)];
-    for (int i = 0; i < data_length; i++) data[i] = new LinkedList<Student*>();
-    bool recurse = false;
+    LinkedList<Student*>** oldArray = data; // save a pointer to the old array
+    data = new LinkedList<Student*>*[(data_length *= 2)]; // set data to new double size array
+    for (int i = 0; i < data_length; i++) data[i] = new LinkedList<Student*>(); // initialize linked lists
+    bool recurse = false; // if still 2 chained
     for (int i = 0; i < data_length / 2; i++) {
         for (int j = 0; j < oldArray[i]->getSize(); j++) {
             data[hashFunction(oldArray[i]->get(j))]->add(oldArray[i]->get(j));
             if (data[hashFunction(oldArray[i]->get(j))]->getSize() > 3) recurse = true;
         }
-    } delete[] oldArray; 
-    if (recurse) rehash();
+    } delete[] oldArray; // deallocate old array
+    if (recurse) rehash(); 
 }
 
 void HashTable::remove(int id) {
     for (int i = 0; i < data_length; i++) {
         for (int j = 0; j < data[i]->getSize(); j++) {
-            if (id == data[i]->get(j)->getID()) {
+            if (id == data[i]->get(j)->getID()) { // loop through and find ID
                 cout << "Removed " << data[i]->get(j)->getName() << endl;
                 delete data[i]->get(j); // deallocate student first
                 data[i]->remove(j);

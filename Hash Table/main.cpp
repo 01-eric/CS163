@@ -7,7 +7,7 @@
 #include <fstream>
 #include <ctime>
 
-Student* getRandomStudent() {
+Student* getRandomStudent() { // pulls random first name, random last name, random ID, and random GPA
     vector<char*>* first = new vector<char*>(); // read in all names into a vector
     vector<char*>* last = new vector<char*>();
     ifstream fin1; // file input from first file
@@ -54,17 +54,17 @@ int main() {
         vector<char*>* tokens = split(input, ' ');
         if (strcmp(tokens->front(), "print") == 0) hash->print();
         else if (strcmp(tokens->front(), "add") == 0) {
-            if (strcmp(tokens->at(1), "rand") == 0) {
+            if (strcmp(tokens->at(1), "rand") == 0) { // random add
                 int count = (tokens->size() == 2 ? 1 : atoi(tokens->back()));
                 while (count-- > 0) hash->add(getRandomStudent());
-            } else {
-                char* name = new char[strlen(tokens->at(1)) + 1];
-                strcpy(name, tokens->at(1));
+            } else { // user designated add
+                char* name = new char[strlen(tokens->at(1)) + 1]; // concat to this string
+                strcpy(name, tokens->at(1)); 
                 concat(name, " ");
-                concat(name, tokens->at(2));
+                concat(name, tokens->at(2)); 
                 hash->add(new Student(name, atoi(tokens->at(3)), atof(tokens->back())));
             }
-        } else if (strcmp(tokens->front(), "rm") == 0) hash->remove(atoi(tokens->back()));
+        } else if (strcmp(tokens->front(), "rm") == 0) hash->remove(atoi(tokens->back())); // remove by ID
         delete tokens;
     } while (strcmp(input, "quit") != 0);
     delete[] input;

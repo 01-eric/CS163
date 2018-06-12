@@ -95,14 +95,14 @@ void LinkedList<T>::print() {
 
 template <class T>
 void LinkedList<T>::remove() { // removes last element (cannot call on empty list)
-    if (!tail->getPrevious()) {
+    if (!tail->getPrevious()) { // if 1 element
         delete tail;
-        head = tail = NULL;
-    } else {
+        head = tail = NULL; // no elements left
+    } else { // otherwise delete tail and move it to the left
         tail = tail->getPrevious();
         delete tail->getNext();
         tail->setNext(NULL);
-    } size--;
+    } size--; // decrease size
 }
 
 template <class T>
